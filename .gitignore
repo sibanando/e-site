@@ -1,0 +1,12 @@
+# Large backup files
+*.tar
+*.tar.gz
+*.zip
+*.rar
+
+# Node modules
+node_modules/
+
+# Environment files
+.env
+.env.local

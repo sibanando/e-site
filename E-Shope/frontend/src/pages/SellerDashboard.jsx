@@ -49,6 +49,8 @@ const SellerDashboard = () => {
     const [newProduct, setNewProduct] = useState({ name: '', price: '', description: '', category: 'Electronics', image: '', discount: 0, stock: 100 });
     const [addLoading, setAddLoading] = useState(false);
     const [addSuccess, setAddSuccess] = useState(false);
+    const [imageFile, setImageFile] = useState(null);
+    const [uploading, setUploading] = useState(false);
 
     // Profile state
     const [profileName, setProfileName] = useState(user?.name || '');
@@ -101,22 +103,37 @@ const SellerDashboard = () => {
         e.preventDefault();
         setAddLoading(true);
         try {
+            let imageUrl = newProduct.image || 'https://placehold.co/400x400?text=Product';
+            // Upload file if selected
+            if (imageFile) {
+                setUploading(true);
+                const formData = new FormData();
+                formData.append('image', imageFile);
+                const upRes = await api.post('/upload', formData, {
+                    ...authHeader(),
+                    headers: { ...authHeader().headers, 'Content-Type': 'multipart/form-data' }
+                });
+                imageUrl = upRes.data.url;
+                setUploading(false);
+            }
             await api.post('/seller/products', {
                 name: newProduct.name,
                 price: parseFloat(newProduct.price),
                 description: newProduct.description,
                 category: newProduct.category,
-                images: JSON.stringify([newProduct.image || 'https://placehold.co/400x400?text=Product']),
+                images: JSON.stringify([imageUrl]),
                 discount: parseInt(newProduct.discount) || 0,
                 stock: parseInt(newProduct.stock) || 100
             }, authHeader());
             setAddSuccess(true);
             setTimeout(() => { setAddSuccess(false); setActiveTab('my-products'); }, 1500);
             setNewProduct({ name: '', price: '', description: '', category: 'Electronics', image: '', discount: 0, stock: 100 });
+            setImageFile(null);
             fetchProducts();
             fetchStats();
         } catch (err) {
             alert('Error: ' + (err.response?.data?.message || err.message));
+            setUploading(false);
         }
         setAddLoading(false);
     };
@@ -446,17 +463,36 @@ const SellerDashboard = () => {
                                             style={{ ...inputStyle, resize: 'none' }} rows={3} required />
                                     </div>
                                     <div style={{ marginBottom: '20px' }}>
-                                        <label style={labelStyle}>Product Image URL</label>
-                                        <input placeholder="https://example.com/image.jpg" value={newProduct.image}
-                                            onChange={e => setNewProduct({ ...newProduct, image: e.target.value })} style={inputStyle} />
+                                        <label style={labelStyle}>Product Image</label>
+                                        <input type="file" accept="image/*"
+                                            onChange={e => {
+                                                const file = e.target.files[0];
+                                                if (file) {
+                                                    setImageFile(file);
+                                                    setNewProduct({ ...newProduct, image: URL.createObjectURL(file) });
+                                                }
+                                            }}
+                                            style={{ ...inputStyle, padding: '6px 12px' }} />
+                                        <div style={{ marginTop: '8px' }}>
+                                            <label style={{ ...labelStyle, fontSize: '10px', color: '#aaa' }}>Or paste image URL</label>
+                                            <input placeholder="https://example.com/image.jpg" value={imageFile ? '' : newProduct.image}
+                                                onChange={e => { setImageFile(null); setNewProduct({ ...newProduct, image: e.target.value }); }}
+                                                style={inputStyle} disabled={!!imageFile} />
+                                        </div>
                                         {newProduct.image && (
                                             <img src={newProduct.image} alt="preview" onError={e => e.target.style.display = 'none'}
                                                 style={{ width: '80px', height: '80px', objectFit: 'contain', marginTop: '8px', border: '1px solid #e0e0e0', borderRadius: '4px', padding: '4px' }} />
                                         )}
+                                        {imageFile && (
+                                            <button type="button" onClick={() => { setImageFile(null); setNewProduct({ ...newProduct, image: '' }); }}
+                                                style={{ marginTop: '6px', fontSize: '11px', color: '#e53935', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
+                                                Remove file
+                                            </button>
+                                        )}
                                     </div>
-                                    <button type="submit" disabled={addLoading}
-                                        style={{ width: '100%', padding: '12px', fontWeight: 700, fontSize: '14px', borderRadius: '4px', background: addLoading ? '#ccc' : '#388e3c', color: 'white', border: 'none', cursor: addLoading ? 'not-allowed' : 'pointer' }}>
-                                        {addLoading ? 'Listing Product...' : '+ List Product for Sale'}
+                                    <button type="submit" disabled={addLoading || uploading}
+                                        style={{ width: '100%', padding: '12px', fontWeight: 700, fontSize: '14px', borderRadius: '4px', background: (addLoading || uploading) ? '#ccc' : '#388e3c', color: 'white', border: 'none', cursor: (addLoading || uploading) ? 'not-allowed' : 'pointer' }}>
+                                        {uploading ? 'Uploading Image...' : addLoading ? 'Listing Product...' : '+ List Product for Sale'}
                                     </button>
                                 </form>
                             </div>

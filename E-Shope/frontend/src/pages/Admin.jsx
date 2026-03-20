@@ -43,6 +43,7 @@ const Admin = () => {
     });
     const [submitted, setSubmitted] = useState(false);
     const [productSearch, setProductSearch] = useState('');
+    const [imageFile, setImageFile] = useState(null);
     const [editProduct, setEditProduct] = useState(null);
     const [editProductData, setEditProductData] = useState({});
 
@@ -87,18 +88,26 @@ const Admin = () => {
     const handleCreateProduct = async (e) => {
         e.preventDefault();
         try {
+            let imageUrl = newProduct.image || 'https://via.placeholder.com/400x400?text=Product';
+            if (imageFile) {
+                const formData = new FormData();
+                formData.append('image', imageFile);
+                const upRes = await api.post('/upload', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
+                imageUrl = upRes.data.url;
+            }
             await api.post('/products', {
                 name: newProduct.name,
                 price: parseFloat(newProduct.price),
                 description: newProduct.description,
                 category: newProduct.category,
-                images: JSON.stringify([newProduct.image || 'https://via.placeholder.com/400x400?text=Product']),
+                images: JSON.stringify([imageUrl]),
                 discount: parseInt(newProduct.discount) || 0,
                 stock: parseInt(newProduct.stock) || 100
             });
             setSubmitted(true);
             setTimeout(() => setSubmitted(false), 3000);
             setNewProduct({ name: '', price: '', description: '', category: 'Electronics', image: '', discount: 20, stock: 100 });
+            setImageFile(null);
             fetchProducts();
         } catch (err) {
             alert('Error: ' + (err.response?.data?.message || err.message));
@@ -144,13 +153,13 @@ const Admin = () => {
     };
 
     const openEditUser = (u) => {
-        setEditUserData({ name: u.name, email: u.email, password: '' });
+        setEditUserData({ name: u.name, email: u.email, password: '', is_seller: u.is_seller || 0 });
         setShowNewPassword(false); setEditUser(u);
     };
 
     const handleSaveUser = async () => {
         try {
-            await api.put(`/admin/users/${editUser.id}`, { name: editUserData.name, email: editUserData.email, password: editUserData.password || '' });
+            await api.put(`/admin/users/${editUser.id}`, { name: editUserData.name, email: editUserData.email, password: editUserData.password || '', is_seller: editUserData.is_seller });
             setEditUser(null); fetchUsers();
         } catch (err) { alert('Save failed: ' + (err.response?.data?.message || err.message)); }
     };
@@ -245,6 +254,19 @@ const Admin = () => {
                                 </button>
                             </div>
                             {editUserData.password && <p style={{ fontSize: '12px', color: '#e65100', marginTop: '4px' }}>⚠ Password will be changed on save</p>}
+                        </div>
+                        <div style={{ marginBottom: '12px' }}>
+                            <label style={labelStyle}>Role</label>
+                            <div style={{ display: 'flex', gap: '8px' }}>
+                                <button type="button" onClick={() => setEditUserData({ ...editUserData, is_seller: 0 })}
+                                    style={{ flex: 1, padding: '8px', fontSize: '12px', fontWeight: 600, borderRadius: '4px', cursor: 'pointer', border: '1px solid', borderColor: !editUserData.is_seller ? '#2874f0' : '#ddd', background: !editUserData.is_seller ? '#e8f0fe' : 'white', color: !editUserData.is_seller ? '#2874f0' : '#666' }}>
+                                    User
+                                </button>
+                                <button type="button" onClick={() => setEditUserData({ ...editUserData, is_seller: 1 })}
+                                    style={{ flex: 1, padding: '8px', fontSize: '12px', fontWeight: 600, borderRadius: '4px', cursor: 'pointer', border: '1px solid', borderColor: editUserData.is_seller ? '#388e3c' : '#ddd', background: editUserData.is_seller ? '#e8f5e9' : 'white', color: editUserData.is_seller ? '#388e3c' : '#666' }}>
+                                    Seller
+                                </button>
+                            </div>
                         </div>
                         <div style={{ display: 'flex', gap: '8px' }}>
                             <button onClick={handleSaveUser} style={{ flex: 1, padding: '8px', fontWeight: 700, fontSize: '13px', borderRadius: '2px', background: '#2874f0', color: 'white', border: 'none', cursor: 'pointer' }}>Save Changes</button>
@@ -392,10 +414,27 @@ const Admin = () => {
                                                 style={{ ...inputStyle, resize: 'none' }} rows={2} required />
                                         </div>
                                         <div style={{ marginBottom: '12px' }}>
-                                            <label style={labelStyle}>Image URL</label>
-                                            <input placeholder="https://..." value={newProduct.image}
-                                                onChange={(e) => setNewProduct({ ...newProduct, image: e.target.value })}
-                                                style={inputStyle} />
+                                            <label style={labelStyle}>Product Image</label>
+                                            <input type="file" accept="image/*"
+                                                onChange={e => {
+                                                    const file = e.target.files[0];
+                                                    if (file) {
+                                                        setImageFile(file);
+                                                        setNewProduct({ ...newProduct, image: URL.createObjectURL(file) });
+                                                    }
+                                                }}
+                                                style={{ ...inputStyle, padding: '5px 10px', fontSize: '12px' }} />
+                                            {!imageFile && (
+                                                <input placeholder="Or paste image URL..." value={newProduct.image}
+                                                    onChange={(e) => setNewProduct({ ...newProduct, image: e.target.value })}
+                                                    style={{ ...inputStyle, marginTop: '6px', fontSize: '11px' }} />
+                                            )}
+                                            {imageFile && (
+                                                <button type="button" onClick={() => { setImageFile(null); setNewProduct({ ...newProduct, image: '' }); }}
+                                                    style={{ fontSize: '11px', color: '#e53935', background: 'none', border: 'none', cursor: 'pointer', marginTop: '4px', padding: 0 }}>
+                                                    Remove file
+                                                </button>
+                                            )}
                                         </div>
                                         <div style={{ marginBottom: '12px' }}>
                                             <label style={labelStyle}>Stock</label>
@@ -543,8 +582,8 @@ const Admin = () => {
                                                 </td>
                                                 <td style={{ padding: '12px 16px', fontSize: '13px', color: '#555' }}>{u.email}</td>
                                                 <td style={{ padding: '12px 16px' }}>
-                                                    <span style={{ fontSize: '11px', padding: '2px 8px', borderRadius: '9999px', fontWeight: 600, ...(u.is_admin ? { background: '#fce8e6', color: '#f44336' } : { background: '#e8f0fe', color: '#2874f0' }) }}>
-                                                        {u.is_admin ? 'Admin' : 'User'}
+                                                    <span style={{ fontSize: '11px', padding: '2px 8px', borderRadius: '9999px', fontWeight: 600, ...(u.is_admin ? { background: '#fce8e6', color: '#f44336' } : u.is_seller ? { background: '#e8f5e9', color: '#388e3c' } : { background: '#e8f0fe', color: '#2874f0' }) }}>
+                                                        {u.is_admin ? 'Admin' : u.is_seller ? 'Seller' : 'User'}
                                                     </span>
                                                 </td>
                                                 <td style={{ padding: '12px 16px', fontSize: '12px', color: '#aaa' }}>

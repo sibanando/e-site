@@ -8,5 +8,5 @@ spec:
     - ReadWriteOnce
   resources:
     requests:
-      storage: 5Gi
-  # storageClassName: standard   # use your cluster's default (gp2, managed-premium, etc.)
+      storage: 20Gi
+  # storageClassName: gp2   # uncomment on AWS EKS

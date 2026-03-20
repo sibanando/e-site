@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Eye, EyeOff, User, Mail, Lock } from 'lucide-react';
+import { Eye, EyeOff, User, Mail, Lock, ArrowRight, ShoppingBag, Store } from 'lucide-react';
 import useResponsive from '../hooks/useResponsive';
 
 const Login = () => {
@@ -14,15 +14,10 @@ const Login = () => {
     const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
-    const [accountType, setAccountType] = useState('customer'); // 'customer' | 'seller'
+    const [accountType, setAccountType] = useState('customer');
+    const [focusedField, setFocusedField] = useState(null);
     const { login, register } = useAuth();
     const navigate = useNavigate();
-
-    const inputStyle = {
-        width: '100%', padding: '10px 12px 10px 36px', border: '1px solid #d1d5db',
-        borderRadius: '4px', fontSize: '14px', outline: 'none', background: '#fff',
-        color: '#212121', boxSizing: 'border-box'
-    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -47,132 +42,226 @@ const Login = () => {
     const fillDemo = () => { setEmail('user@example.com'); setPassword('password123'); setIsRegister(false); };
     const fillSeller = () => { setEmail('seller@apnidunia.com'); setPassword('seller123'); setIsRegister(false); };
 
+    const getInputStyle = (field) => ({
+        width: '100%',
+        padding: '14px 16px 14px 44px',
+        border: 'none',
+        borderBottom: `2px solid ${focusedField === field ? '#6366f1' : 'rgba(255,255,255,0.15)'}`,
+        borderRadius: '12px 12px 0 0',
+        fontSize: '14px',
+        outline: 'none',
+        background: 'rgba(255,255,255,0.06)',
+        color: '#f0f0f0',
+        boxSizing: 'border-box',
+        transition: 'all 0.3s ease',
+        letterSpacing: '0.3px',
+    });
+
+    const iconStyle = (field) => ({
+        position: 'absolute', left: '14px', top: '15px',
+        color: focusedField === field ? '#a5b4fc' : 'rgba(255,255,255,0.35)',
+        transition: 'color 0.3s ease', zIndex: 1,
+    });
+
     return (
-        <div style={{ background: '#f1f3f6', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '32px 16px' }}>
-            <div style={{ width: '100%', maxWidth: isMobile ? '420px' : '750px', background: 'white', borderRadius: '4px', boxShadow: '0 4px 20px rgba(0,0,0,0.12)', overflow: 'hidden', display: 'flex', minHeight: isMobile ? 'auto' : '480px' }}>
+        <div style={{
+            minHeight: '100vh',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            padding: '32px 16px',
+            background: 'linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%)',
+            position: 'relative', overflow: 'hidden',
+        }}>
+            {/* Floating orbs */}
+            <div style={{ position: 'absolute', top: '-120px', right: '-80px', width: '350px', height: '350px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(99,102,241,0.2) 0%, transparent 70%)', pointerEvents: 'none' }} />
+            <div style={{ position: 'absolute', bottom: '-100px', left: '-60px', width: '300px', height: '300px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(168,85,247,0.15) 0%, transparent 70%)', pointerEvents: 'none' }} />
+            <div style={{ position: 'absolute', top: '40%', left: '60%', width: '200px', height: '200px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(59,130,246,0.1) 0%, transparent 70%)', pointerEvents: 'none' }} />
 
-                {/* Left Blue Panel — hidden on mobile */}
-                {!isMobile && (
-                <div style={{ background: '#2874f0', width: '42%', flexShrink: 0, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', padding: '40px 32px' }}>
-                    <div>
-                        <h1 style={{ fontSize: '28px', fontWeight: 700, color: 'white', marginBottom: '12px', lineHeight: 1.3 }}>
-                            {isRegister ? "Looks like you're new here!" : 'Login'}
-                        </h1>
-                        <p style={{ color: 'rgba(255,255,255,0.8)', fontSize: '14px', lineHeight: 1.6 }}>
-                            {isRegister
-                                ? 'Sign up with your email to get started'
-                                : 'Get access to your Orders, Wishlist and Recommendations'}
-                        </p>
+            <div style={{
+                width: '100%', maxWidth: '440px',
+                background: 'rgba(255,255,255,0.05)',
+                backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)',
+                borderRadius: '24px',
+                border: '1px solid rgba(255,255,255,0.1)',
+                boxShadow: '0 25px 60px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.1)',
+                overflow: 'hidden',
+            }}>
+                {/* Header */}
+                <div style={{ padding: '32px 32px 0', textAlign: 'center' }}>
+                    {/* Logo mark */}
+                    <div style={{
+                        width: '56px', height: '56px', borderRadius: '16px',
+                        background: 'linear-gradient(135deg, #6366f1, #a855f7)',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        margin: '0 auto 16px',
+                        boxShadow: '0 8px 24px rgba(99,102,241,0.35)',
+                    }}>
+                        <ShoppingBag size={26} style={{ color: 'white' }} />
                     </div>
-                    <img
-                        src="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=400&h=300&fit=crop"
-                        alt="Shopping"
-                        style={{ borderRadius: '8px', width: '100%', objectFit: 'cover', maxHeight: '200px', opacity: 0.85 }}
-                    />
+                    <h1 style={{ fontSize: '24px', fontWeight: 700, color: '#f0f0f0', margin: '0 0 4px', letterSpacing: '-0.5px' }}>
+                        ApniDunia
+                    </h1>
+                    <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '13px', margin: 0, letterSpacing: '0.5px' }}>
+                        {isRegister ? 'Create your account' : 'Welcome back'}
+                    </p>
                 </div>
-                )}
 
-                {/* Right Form Panel */}
-                <div style={{ flex: 1, padding: isMobile ? '28px 20px' : '40px 32px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-                    {/* Logo (shown always for branding) */}
-                    <div style={{ textAlign: 'center', marginBottom: '20px' }}>
-                        <span style={{ fontSize: '22px', fontWeight: 700, color: '#2874f0' }}>ApniDunia</span>
-                    </div>
-
-                    {/* Tab Switch */}
-                    <div style={{ display: 'flex', marginBottom: '24px', borderBottom: '1px solid #e0e0e0' }}>
+                {/* Tab Toggle */}
+                <div style={{ padding: '20px 32px 0', display: 'flex' }}>
+                    <div style={{
+                        display: 'flex', width: '100%',
+                        background: 'rgba(255,255,255,0.06)',
+                        borderRadius: '12px', padding: '4px',
+                    }}>
                         {['Login', 'Register'].map((tab, i) => {
                             const active = i === 0 ? !isRegister : isRegister;
                             return (
                                 <button key={tab} onClick={() => { setIsRegister(i === 1); setError(''); }}
-                                    style={{ flex: 1, padding: '8px', fontSize: '14px', fontWeight: 600, border: 'none', background: 'none', cursor: 'pointer', borderBottom: active ? '2px solid #2874f0' : '2px solid transparent', color: active ? '#2874f0' : '#878787', transition: 'all 0.2s' }}>
+                                    style={{
+                                        flex: 1, padding: '10px', fontSize: '13px', fontWeight: 600,
+                                        border: 'none', cursor: 'pointer',
+                                        borderRadius: '9px',
+                                        background: active ? 'linear-gradient(135deg, #6366f1, #8b5cf6)' : 'transparent',
+                                        color: active ? 'white' : 'rgba(255,255,255,0.4)',
+                                        transition: 'all 0.3s ease',
+                                        boxShadow: active ? '0 4px 12px rgba(99,102,241,0.3)' : 'none',
+                                    }}>
                                     {tab}
                                 </button>
                             );
                         })}
                     </div>
+                </div>
 
+                {/* Form */}
+                <div style={{ padding: '24px 32px 32px' }}>
                     {error && (
-                        <div style={{ background: '#fdecea', border: '1px solid #ef9a9a', color: '#c62828', padding: '10px 12px', borderRadius: '4px', fontSize: '13px', marginBottom: '16px' }}>
+                        <div style={{
+                            background: 'rgba(239,68,68,0.12)',
+                            border: '1px solid rgba(239,68,68,0.25)',
+                            color: '#fca5a5', padding: '10px 14px', borderRadius: '10px',
+                            fontSize: '13px', marginBottom: '16px',
+                        }}>
                             {error}
                         </div>
                     )}
 
-                    <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                    <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
                         {isRegister && (
                             <>
                                 <div style={{ position: 'relative' }}>
-                                    <User size={16} style={{ position: 'absolute', left: '10px', top: '12px', color: '#9ca3af', zIndex: 1 }} />
+                                    <User size={16} style={iconStyle('name')} />
                                     <input type="text" placeholder="Full Name" value={name}
-                                        onChange={e => setName(e.target.value)} required={isRegister} style={inputStyle} />
+                                        onChange={e => setName(e.target.value)}
+                                        onFocus={() => setFocusedField('name')} onBlur={() => setFocusedField(null)}
+                                        required={isRegister} style={getInputStyle('name')} />
                                 </div>
 
-                                {/* Account Type Toggle */}
-                                <div>
-                                    <p style={{ fontSize: '12px', fontWeight: 600, color: '#555', marginBottom: '8px' }}>Account Type</p>
-                                    <div style={{ display: 'flex', gap: '8px' }}>
-                                        {[
-                                            { id: 'customer', label: '🛒 Customer', desc: 'Shop products' },
-                                            { id: 'seller', label: '🏪 Seller', desc: 'List & sell products' }
-                                        ].map(t => (
-                                            <button key={t.id} type="button" onClick={() => setAccountType(t.id)}
-                                                style={{ flex: 1, padding: '10px 8px', border: `2px solid ${accountType === t.id ? '#2874f0' : '#e0e0e0'}`, borderRadius: '6px', background: accountType === t.id ? '#e8f0fe' : 'white', cursor: 'pointer', transition: 'all 0.2s' }}>
-                                                <div style={{ fontSize: '13px', fontWeight: 600, color: accountType === t.id ? '#2874f0' : '#555' }}>{t.label}</div>
-                                                <div style={{ fontSize: '11px', color: '#888', marginTop: '2px' }}>{t.desc}</div>
-                                            </button>
-                                        ))}
-                                    </div>
-                                    {accountType === 'seller' && (
-                                        <p style={{ fontSize: '11px', color: '#388e3c', marginTop: '6px', fontWeight: 500 }}>
-                                            ✓ You'll get a Seller Panel to list and manage your products
-                                        </p>
-                                    )}
+                                {/* Account Type */}
+                                <div style={{ display: 'flex', gap: '10px' }}>
+                                    {[
+                                        { id: 'customer', icon: <ShoppingBag size={16} />, label: 'Customer' },
+                                        { id: 'seller', icon: <Store size={16} />, label: 'Seller' }
+                                    ].map(t => (
+                                        <button key={t.id} type="button" onClick={() => setAccountType(t.id)}
+                                            style={{
+                                                flex: 1, padding: '12px 10px',
+                                                border: `1px solid ${accountType === t.id ? 'rgba(99,102,241,0.5)' : 'rgba(255,255,255,0.1)'}`,
+                                                borderRadius: '12px', cursor: 'pointer',
+                                                background: accountType === t.id ? 'rgba(99,102,241,0.12)' : 'rgba(255,255,255,0.03)',
+                                                transition: 'all 0.3s ease',
+                                                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+                                            }}>
+                                            <span style={{ color: accountType === t.id ? '#a5b4fc' : 'rgba(255,255,255,0.3)' }}>{t.icon}</span>
+                                            <span style={{ fontSize: '13px', fontWeight: 600, color: accountType === t.id ? '#c7d2fe' : 'rgba(255,255,255,0.35)' }}>{t.label}</span>
+                                        </button>
+                                    ))}
                                 </div>
+                                {accountType === 'seller' && (
+                                    <p style={{ fontSize: '11px', color: '#a78bfa', margin: '-4px 0 0 4px', fontWeight: 500 }}>
+                                        You'll get a Seller Panel to list products
+                                    </p>
+                                )}
                             </>
                         )}
 
                         <div style={{ position: 'relative' }}>
-                            <Mail size={16} style={{ position: 'absolute', left: '10px', top: '12px', color: '#9ca3af', zIndex: 1 }} />
+                            <Mail size={16} style={iconStyle('email')} />
                             <input type="email" placeholder="Email Address" value={email}
-                                onChange={e => setEmail(e.target.value)} required style={inputStyle} />
+                                onChange={e => setEmail(e.target.value)}
+                                onFocus={() => setFocusedField('email')} onBlur={() => setFocusedField(null)}
+                                required style={getInputStyle('email')} />
                         </div>
 
                         <div style={{ position: 'relative' }}>
-                            <Lock size={16} style={{ position: 'absolute', left: '10px', top: '12px', color: '#9ca3af', zIndex: 1 }} />
+                            <Lock size={16} style={iconStyle('password')} />
                             <input type={showPassword ? 'text' : 'password'} placeholder="Password" value={password}
-                                onChange={e => setPassword(e.target.value)} required
-                                style={{ ...inputStyle, paddingRight: '40px' }} />
+                                onChange={e => setPassword(e.target.value)}
+                                onFocus={() => setFocusedField('password')} onBlur={() => setFocusedField(null)}
+                                required style={{ ...getInputStyle('password'), paddingRight: '44px' }} />
                             <button type="button" onClick={() => setShowPassword(!showPassword)}
-                                style={{ position: 'absolute', right: '10px', top: '10px', background: 'none', border: 'none', cursor: 'pointer', color: '#9ca3af', padding: 0 }}>
+                                style={{ position: 'absolute', right: '12px', top: '13px', background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.3)', padding: 0 }}>
                                 {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                             </button>
                         </div>
 
-                        <p style={{ fontSize: '12px', color: '#9ca3af', lineHeight: 1.5, margin: 0 }}>
-                            By continuing, you agree to ApniDunia's{' '}
-                            <a href="#" style={{ color: '#2874f0' }}>Terms of Use</a> and{' '}
-                            <a href="#" style={{ color: '#2874f0' }}>Privacy Policy</a>.
-                        </p>
-
                         <button type="submit" disabled={loading}
-                            style={{ width: '100%', padding: '12px', fontWeight: 700, fontSize: '14px', borderRadius: '4px', border: 'none', cursor: loading ? 'not-allowed' : 'pointer', background: loading ? '#ccc' : '#fb641b', color: 'white' }}>
-                            {loading ? (isRegister ? 'Creating Account...' : 'Logging in...') : (isRegister ? 'Create Account' : 'Login')}
+                            style={{
+                                width: '100%', padding: '14px', fontWeight: 700, fontSize: '14px',
+                                borderRadius: '12px', border: 'none', cursor: loading ? 'not-allowed' : 'pointer',
+                                background: loading ? 'rgba(255,255,255,0.1)' : 'linear-gradient(135deg, #6366f1, #8b5cf6)',
+                                color: 'white', marginTop: '6px',
+                                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+                                boxShadow: loading ? 'none' : '0 8px 24px rgba(99,102,241,0.3)',
+                                transition: 'all 0.3s ease',
+                                letterSpacing: '0.3px',
+                            }}>
+                            {loading
+                                ? (isRegister ? 'Creating Account...' : 'Signing in...')
+                                : (isRegister ? 'Create Account' : 'Sign In')
+                            }
+                            {!loading && <ArrowRight size={16} />}
                         </button>
                     </form>
 
+                    <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.25)', lineHeight: 1.6, margin: '16px 0 0', textAlign: 'center' }}>
+                        By continuing, you agree to our{' '}
+                        <span style={{ color: 'rgba(165,180,252,0.6)', cursor: 'pointer' }}>Terms</span> &{' '}
+                        <span style={{ color: 'rgba(165,180,252,0.6)', cursor: 'pointer' }}>Privacy Policy</span>
+                    </p>
+
+                    {/* Demo credentials */}
                     {!isRegister && (
-                        <div style={{ marginTop: '16px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                            <div onClick={fillDemo} style={{ padding: '10px 12px', borderRadius: '4px', border: '1px solid #ffe082', background: '#fff8e1', fontSize: '12px', cursor: 'pointer' }}
-                                onMouseEnter={e => e.currentTarget.style.background = '#fff3cd'}
-                                onMouseLeave={e => e.currentTarget.style.background = '#fff8e1'}>
-                                <p style={{ fontWeight: 700, color: '#795548', margin: '0 0 2px' }}>🔑 Demo Customer — Click to Auto-fill</p>
-                                <p style={{ color: '#6d4c41', margin: 0 }}>user@example.com / <span style={{ fontFamily: 'monospace' }}>password123</span></p>
+                        <div style={{ marginTop: '20px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                            <p style={{ fontSize: '10px', textTransform: 'uppercase', letterSpacing: '1.5px', color: 'rgba(255,255,255,0.2)', textAlign: 'center', margin: '0 0 4px' }}>Quick Access</p>
+                            <div onClick={fillDemo}
+                                style={{
+                                    padding: '10px 14px', borderRadius: '10px', cursor: 'pointer',
+                                    border: '1px solid rgba(251,191,36,0.2)',
+                                    background: 'rgba(251,191,36,0.06)',
+                                    transition: 'all 0.2s ease',
+                                }}
+                                onMouseEnter={e => { e.currentTarget.style.background = 'rgba(251,191,36,0.12)'; e.currentTarget.style.borderColor = 'rgba(251,191,36,0.35)'; }}
+                                onMouseLeave={e => { e.currentTarget.style.background = 'rgba(251,191,36,0.06)'; e.currentTarget.style.borderColor = 'rgba(251,191,36,0.2)'; }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                    <ShoppingBag size={14} style={{ color: '#fbbf24' }} />
+                                    <span style={{ fontSize: '12px', fontWeight: 600, color: '#fcd34d' }}>Demo Customer</span>
+                                </div>
+                                <p style={{ fontSize: '11px', color: 'rgba(252,211,77,0.5)', margin: '3px 0 0 22px', fontFamily: 'monospace' }}>user@example.com / password123</p>
                             </div>
-                            <div onClick={fillSeller} style={{ padding: '10px 12px', borderRadius: '4px', border: '1px solid #a5d6a7', background: '#e8f5e9', fontSize: '12px', cursor: 'pointer' }}
-                                onMouseEnter={e => e.currentTarget.style.background = '#c8e6c9'}
-                                onMouseLeave={e => e.currentTarget.style.background = '#e8f5e9'}>
-                                <p style={{ fontWeight: 700, color: '#2e7d32', margin: '0 0 2px' }}>🏪 Demo Seller — Click to Auto-fill</p>
-                                <p style={{ color: '#1b5e20', margin: 0 }}>seller@apnidunia.com / <span style={{ fontFamily: 'monospace' }}>seller123</span></p>
+                            <div onClick={fillSeller}
+                                style={{
+                                    padding: '10px 14px', borderRadius: '10px', cursor: 'pointer',
+                                    border: '1px solid rgba(52,211,153,0.2)',
+                                    background: 'rgba(52,211,153,0.06)',
+                                    transition: 'all 0.2s ease',
+                                }}
+                                onMouseEnter={e => { e.currentTarget.style.background = 'rgba(52,211,153,0.12)'; e.currentTarget.style.borderColor = 'rgba(52,211,153,0.35)'; }}
+                                onMouseLeave={e => { e.currentTarget.style.background = 'rgba(52,211,153,0.06)'; e.currentTarget.style.borderColor = 'rgba(52,211,153,0.2)'; }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                    <Store size={14} style={{ color: '#34d399' }} />
+                                    <span style={{ fontSize: '12px', fontWeight: 600, color: '#6ee7b7' }}>Demo Seller</span>
+                                </div>
+                                <p style={{ fontSize: '11px', color: 'rgba(110,231,183,0.5)', margin: '3px 0 0 22px', fontFamily: 'monospace' }}>seller@apnidunia.com / seller123</p>
                             </div>
                         </div>
                     )}

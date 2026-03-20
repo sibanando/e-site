@@ -1,56 +1,125 @@
-# ShopVibe E-commerce Site
+# E-Shope
 
-A complete e-commerce solution built with React (Vite), Node.js (Express), MySQL, and Docker.
+A full-stack e-commerce application — React + Vite frontend, Node/Express backend, PostgreSQL database.
 
 ## Features
 
-- **Product Catalog**: View latest products with details.
-- **Shopping Cart**: Manage your items, update quantities.
-- **User Authentication**: Register and Login functionality.
-- **Checkout**:
-  - **PhonePe Integration** (Mock)
-  - **Google Pay Integration** (Mock)
-  - **UPI QR Code**: Dynamic QR code generation for payments.
-- **Admin Panel**: Manage products and view orders.
-- **Rich Aesthetics**: Modern, dark-themed UI with glassmorphism effects.
+- Product catalog, shopping cart, user auth (JWT)
+- Checkout with mock PhonePe / Google Pay / UPI QR
+- Admin panel (product & user management)
+- Seller panel with stats
 
-## Prerequisites
+## Stack
 
-- Docker Desktop (must be running)
-- Git (optional)
+| Layer    | Tech                          |
+|----------|-------------------------------|
+| Frontend | React 19, Vite 7, Nginx       |
+| Backend  | Node 20, Express, `pg`        |
+| Database | PostgreSQL 16                 |
+| Infra    | Kubernetes (kind) / Docker Compose |
 
-## How to Run
+---
 
-1.  **Start Docker Desktop** on your machine.
-2.  Open a terminal in the project root (`E-Shope`).
-3.  Run the following command:
+## Run with Kubernetes (recommended)
 
-    ```bash
-    docker compose up --build
-    ```
+### Prerequisites
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/) (running)
+- [kind](https://kind.sigs.k8s.io/docs/user/quick-start/#installation)
+- [kubectl](https://kubernetes.io/docs/tasks/tools/)
 
-4.  Wait for the services to start. You can view logs to see when the backend connects to MySQL.
-5.  Access the application:
-    -   **Frontend**: [http://localhost:5173](http://localhost:5173)
-    -   **Backend API**: [http://localhost:5000](http://localhost:5000)
-    -   **MySQL**: Port 3307 (User: root, Pass: password)
+### One-command deploy
 
-## Project Structure
+```bash
+# From project root
+bash k8s/deploy.sh
+```
 
--   `frontend/`: React application (Vite).
--   `backend/`: Node.js Express server.
--   `docker-compose.yml`: Docker orchestration.
+Then open **http://localhost:8080**
 
-## Payment Features
+### What the script does
+1. Creates a kind cluster with ingress port mappings
+2. Installs nginx ingress controller
+3. Builds backend + frontend Docker images
+4. Loads them into the kind cluster (no registry needed)
+5. Applies all K8s manifests via kustomize
+6. Waits for every pod to be `Ready`
 
--   Select **PhonePe** or **Google Pay** in checkout to simulate a transaction.
--   Select **UPI QR Code** to generate a QR code string (`upi://...`) and display it.
+### After code changes (fast reload)
 
-## Admin
+```bash
+bash k8s/redeploy.sh backend    # rebuild + reload backend only
+bash k8s/redeploy.sh frontend   # rebuild + reload frontend only
+bash k8s/redeploy.sh            # both
+```
 
--   Navigate to `/admin` to add products (requires login).
+### Tear down
+
+```bash
+bash k8s/teardown.sh
+```
+
+### Kubernetes manifests (`k8s/`)
+
+| File | Purpose |
+|------|---------|
+| `namespace.yaml` | `apnidunia` namespace |
+| `postgres-secret.yaml` | DB credentials + JWT secret |
+| `configmap.yaml` | Non-secret env vars |
+| `postgres-pvc.yaml` | 20 Gi PVC (kind local-path provisioner) |
+| `postgres-deployment.yaml` | Postgres 16, `PGDATA` subdir, Recreate strategy |
+| `postgres-service.yaml` | ClusterIP on 5432 |
+| `backend-deployment.yaml` | Express API, initContainer waits for pg |
+| `backend-service.yaml` | ClusterIP on 5000 |
+| `frontend-deployment.yaml` | Nginx serving Vite build |
+| `frontend-service.yaml` | ClusterIP on 80 |
+| `ingress.yaml` | Routes `/api` → backend, `/` → frontend |
+| `kind-config.yaml` | Cluster config with port 8080→80 mapping |
+
+### Access
+
+| URL | Description |
+|-----|-------------|
+| http://localhost:8080 | Frontend |
+| http://localhost:8080/api/health | Backend health |
+| http://localhost:8080/admin | Admin panel |
+
+**Admin credentials:** `sibanando` / `Sib@1984`
+
+---
+
+## Run with Docker Compose (simple local dev)
+
+```bash
+docker compose up --build
+```
+
+| Service | URL |
+|---------|-----|
+| Frontend | http://localhost:8181 |
+| Backend API | http://localhost:5000 |
+
+---
+
+## Project structure
+
+```
+E-Shope/
+├── backend/          # Express API
+│   ├── index.js      # Entry point
+│   └── src/
+│       ├── config/db.js
+│       └── routes/
+├── frontend/         # React + Vite
+│   └── src/
+├── k8s/              # Kubernetes manifests
+│   ├── deploy.sh
+│   ├── redeploy.sh
+│   └── teardown.sh
+└── docker-compose.yml
+```
 
 ## Notes
 
--   The initial database is seeded with dummy products.
--   Authentication uses JWT stored in LocalStorage.
+- Database is seeded with demo users and products on first start
+- Auth uses JWT stored in LocalStorage
+- Tailwind is disabled — all styles use React inline `style={{}}`

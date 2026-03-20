@@ -20,8 +20,8 @@ const Navbar = () => {
     const isAdmin = location.pathname === '/admin' || location.pathname === '/seller';
 
     const categories = [
-        'Electronics', 'TVs & Appliances', 'Men', 'Women', 'Baby & Kids',
-        'Home & Furniture', 'Sports', 'Books', 'Flights', 'Grocery'
+        'Electronics', 'Mobiles', 'Fashion', 'Home', 'Sports',
+        'Grocery', 'Appliances', 'Beauty', 'Jewellery', 'Travel'
     ];
 
     const itemCount = items.reduce((sum, item) => sum + item.quantity, 0);
@@ -264,14 +264,18 @@ const Navbar = () => {
                 <div style={{ background: 'rgba(255,255,255,0.96)', borderTop: '1px solid rgba(255,255,255,0.15)' }}>
                     <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '0 16px' }}>
                         <div style={{ display: 'flex', alignItems: 'center', overflowX: 'auto' }}>
-                            {categories.map((cat) => (
-                                <a key={cat} href="#"
-                                    style={{ flexShrink: 0, padding: '10px 14px', fontSize: '13px', fontWeight: 500, color: '#374151', whiteSpace: 'nowrap', borderBottom: '3px solid transparent', textDecoration: 'none', transition: 'all 0.18s' }}
-                                    onMouseEnter={e => { e.currentTarget.style.color = '#1a3f9c'; e.currentTarget.style.borderBottomColor = '#1a3f9c'; e.currentTarget.style.background = '#f0f4ff'; }}
-                                    onMouseLeave={e => { e.currentTarget.style.color = '#374151'; e.currentTarget.style.borderBottomColor = 'transparent'; e.currentTarget.style.background = 'transparent'; }}>
-                                    {cat}
-                                </a>
-                            ))}
+                            {categories.map((cat) => {
+                                const isActive = searchParams.get('category') === cat;
+                                return (
+                                    <button key={cat}
+                                        onClick={() => navigate(isActive ? '/' : `/?category=${encodeURIComponent(cat)}`)}
+                                        style={{ flexShrink: 0, padding: '10px 14px', fontSize: '13px', fontWeight: isActive ? 700 : 500, color: isActive ? '#1a3f9c' : '#374151', whiteSpace: 'nowrap', borderBottom: isActive ? '3px solid #1a3f9c' : '3px solid transparent', borderTop: 'none', borderLeft: 'none', borderRight: 'none', textDecoration: 'none', transition: 'all 0.18s', background: isActive ? '#f0f4ff' : 'transparent', cursor: 'pointer' }}
+                                        onMouseEnter={e => { e.currentTarget.style.color = '#1a3f9c'; e.currentTarget.style.borderBottomColor = '#1a3f9c'; e.currentTarget.style.background = '#f0f4ff'; }}
+                                        onMouseLeave={e => { if (!isActive) { e.currentTarget.style.color = '#374151'; e.currentTarget.style.borderBottomColor = 'transparent'; e.currentTarget.style.background = 'transparent'; } }}>
+                                        {cat}
+                                    </button>
+                                );
+                            })}
                         </div>
                     </div>
                 </div>

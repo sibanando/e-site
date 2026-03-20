@@ -32,19 +32,28 @@ router.get('/users', verifyToken, async (req, res) => {
     }
 });
 
-// PUT /api/admin/users/:id — edit name, email, and optionally reset password
+// PUT /api/admin/users/:id — edit name, email, role, and optionally reset password
 router.put('/users/:id', verifyToken, async (req, res) => {
     try {
         const { id } = req.params;
-        const { name, email, password } = req.body;
+        const { name, email, password, is_seller } = req.body;
         if (!name || !email) {
             return res.status(400).json({ message: 'Name and email are required' });
         }
+        const sellerVal = is_seller !== undefined ? (parseInt(is_seller) ? 1 : 0) : undefined;
         if (password && password.trim()) {
             const hash = bcrypt.hashSync(password.trim(), 10);
-            await db.query('UPDATE users SET name=$1, email=$2, password=$3 WHERE id=$4', [name, email, hash, id]);
+            if (sellerVal !== undefined) {
+                await db.query('UPDATE users SET name=$1, email=$2, password=$3, is_seller=$4 WHERE id=$5', [name, email, hash, sellerVal, id]);
+            } else {
+                await db.query('UPDATE users SET name=$1, email=$2, password=$3 WHERE id=$4', [name, email, hash, id]);
+            }
         } else {
-            await db.query('UPDATE users SET name=$1, email=$2 WHERE id=$3', [name, email, id]);
+            if (sellerVal !== undefined) {
+                await db.query('UPDATE users SET name=$1, email=$2, is_seller=$3 WHERE id=$4', [name, email, sellerVal, id]);
+            } else {
+                await db.query('UPDATE users SET name=$1, email=$2 WHERE id=$3', [name, email, id]);
+            }
         }
         res.json({ message: 'User updated successfully' });
     } catch (err) {

@@ -10,6 +10,8 @@ spec:
   selector:
     matchLabels:
       app: postgres
+  strategy:
+    type: Recreate              # required for ReadWriteOnce volumes
   template:
     metadata:
       labels:
@@ -36,14 +38,25 @@ spec:
                 secretKeyRef:
                   name: postgres-secret
                   key: POSTGRES_PASSWORD
+            # CRITICAL for hostPath volumes: postgres requires the data dir to be
+            # empty on first run. Using a sub-directory avoids the "not empty" error.
+            - name: PGDATA
+              value: /var/lib/postgresql/data/pgdata
           volumeMounts:
             - name: pg-storage
               mountPath: /var/lib/postgresql/data
           readinessProbe:
             exec:
-              command: ["pg_isready", "-U", "postgres"]
-            initialDelaySeconds: 10
+              command: ["pg_isready", "-U", "postgres", "-d", "apnidunia"]
+            initialDelaySeconds: 15
             periodSeconds: 5
+            failureThreshold: 6
+          livenessProbe:
+            exec:
+              command: ["pg_isready", "-U", "postgres"]
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            failureThreshold: 6
           resources:
             requests:
               memory: "256Mi"

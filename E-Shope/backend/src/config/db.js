@@ -5,8 +5,8 @@ const pool = new Pool({
     connectionString: process.env.DATABASE_URL || 'postgresql://postgres:password@localhost:5432/apnidunia',
     ssl: process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : false,
     max: 10,
-    idleTimeoutMillis: 30000,
-    connectionTimeoutMillis: 5000,
+    idleTimeoutMillis: 60000,
+    connectionTimeoutMillis: 30000,
 });
 
 // Thin wrapper — routes use: await db.query(sql, params)
@@ -86,6 +86,12 @@ const initDb = async () => {
             { name: 'Realme Narzo 60 5G (8GB+128GB)', price: 14999, description: 'Dimensity 6020, 64MP camera, 5000mAh, 33W fast charging', category: 'Mobiles', images: JSON.stringify(['https://images.unsplash.com/photo-1574944985070-8f3ebc6b79d2?w=400&h=400&fit=crop']), rating: 4.2, reviews: 19800, discount: 20, stock: 130 },
             { name: 'YOGA MAT Anti-Slip 6mm Exercise Mat', price: 599, description: 'Eco-friendly TPE material, carrying strap included, 183x61cm', category: 'Sports', images: JSON.stringify(['https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=400&h=400&fit=crop']), rating: 4.4, reviews: 8900, discount: 65, stock: 400 },
             { name: 'Lakme Absolute Matte Lipstick Combo', price: 349, description: 'Pack of 4 shades, long-lasting 8 hrs, vitamin E enriched', category: 'Beauty', images: JSON.stringify(['https://images.unsplash.com/photo-1631214524020-3c69f87cd1cd?w=400&h=400&fit=crop']), rating: 4.1, reviews: 22100, discount: 30, stock: 600 },
+            { name: 'Tata Sampann Unpolished Dal Combo Pack', price: 399, description: '4 types of dal, 1kg each, rich in protein, farm fresh', category: 'Grocery', images: JSON.stringify(['https://images.unsplash.com/photo-1586201375761-83865001e31c?w=400&h=400&fit=crop']), rating: 4.3, reviews: 15600, discount: 20, stock: 800 },
+            { name: 'Organic Cold Pressed Coconut Oil 1L', price: 299, description: '100% pure virgin coconut oil, chemical free, wood pressed', category: 'Grocery', images: JSON.stringify(['https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=400&h=400&fit=crop']), rating: 4.5, reviews: 9200, discount: 15, stock: 500 },
+            { name: 'Tanishq Gold Plated Necklace Set', price: 2499, description: 'Traditional design, anti-tarnish coating, adjustable length', category: 'Jewellery', images: JSON.stringify(['https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=400&h=400&fit=crop']), rating: 4.6, reviews: 4300, discount: 25, stock: 70 },
+            { name: 'Silver Oxidized Jhumka Earrings Set', price: 449, description: 'Handcrafted, lightweight, perfect for daily & festive wear', category: 'Jewellery', images: JSON.stringify(['https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?w=400&h=400&fit=crop']), rating: 4.4, reviews: 7800, discount: 40, stock: 300 },
+            { name: 'Safari Trolley Bag 65cm - Hardcase', price: 2999, description: '4 wheel spinner, TSA lock, expandable, scratch resistant', category: 'Travel', images: JSON.stringify(['https://images.unsplash.com/photo-1565026057447-bc90a3dceb87?w=400&h=400&fit=crop']), rating: 4.3, reviews: 11400, discount: 50, stock: 150 },
+            { name: 'Neck Pillow & Eye Mask Travel Kit', price: 599, description: 'Memory foam pillow, silk eye mask, earplugs, carry pouch', category: 'Travel', images: JSON.stringify(['https://images.unsplash.com/photo-1544161515-4ab6ce6db874?w=400&h=400&fit=crop']), rating: 4.2, reviews: 5600, discount: 35, stock: 250 },
         ];
         for (const p of seedProducts) {
             await pool.query(
@@ -94,7 +100,7 @@ const initDb = async () => {
                 [p.name, p.price, p.description, p.category, p.images, p.rating, p.reviews, p.discount, p.stock]
             );
         }
-        console.log('✓ Database seeded with 15 products');
+        console.log('✓ Database seeded with 21 products');
     }
 
     // ─── Seed Demo User ───────────────────────────────────────────────────────

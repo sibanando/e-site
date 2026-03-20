@@ -42,7 +42,8 @@ const ProductCard = ({ product, compact = false }) => {
                 onMouseLeave={e => { e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.borderColor = '#e8ecf4'; }}>
                 <div style={{ position: 'relative', padding: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f8faff', height: '130px', overflow: 'hidden' }}>
                     <img src={getProductImage()} alt={product.name}
-                        style={{ maxHeight: '100%', maxWidth: '100%', objectFit: 'contain' }} />
+                        style={{ maxHeight: '100%', maxWidth: '100%', objectFit: 'contain' }}
+                        onError={e => { e.currentTarget.onerror = null; e.currentTarget.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='250' height='250'%3E%3Crect width='250' height='250' fill='%23f0f4ff'/%3E%3Ctext x='125' y='120' text-anchor='middle' font-family='Arial' font-size='13' fill='%2394a3b8'%3ENo Image%3C/text%3E%3C/svg%3E"; }} />
                     <span style={{ position: 'absolute', top: '8px', left: '8px', background: 'linear-gradient(135deg, #dc2626, #f97316)', color: 'white', fontSize: '10px', fontWeight: 700, padding: '2px 7px', borderRadius: '4px', boxShadow: '0 2px 6px rgba(220,38,38,0.3)' }}>
                         {discount}% off
                     </span>
@@ -73,7 +74,8 @@ const ProductCard = ({ product, compact = false }) => {
                 <img src={getProductImage()} alt={product.name}
                     style={{ maxHeight: '100%', maxWidth: '100%', objectFit: 'contain', transition: 'transform 0.3s ease' }}
                     onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.07)'}
-                    onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'} />
+                    onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
+                    onError={e => { e.currentTarget.onerror = null; e.currentTarget.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='250' height='250'%3E%3Crect width='250' height='250' fill='%23f0f4ff'/%3E%3Ctext x='125' y='120' text-anchor='middle' font-family='Arial' font-size='13' fill='%2394a3b8'%3ENo Image%3C/text%3E%3C/svg%3E"; }} />
 
                 {/* Discount badge */}
                 <span style={{ position: 'absolute', top: '10px', left: '10px', background: 'linear-gradient(135deg, #dc2626, #f97316)', color: 'white', fontSize: '11px', fontWeight: 700, padding: '3px 8px', borderRadius: '5px', boxShadow: '0 2px 8px rgba(220,38,38,0.35)' }}>
