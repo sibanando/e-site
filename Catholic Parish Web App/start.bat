@@ -1,0 +1,23 @@
+@echo off
+echo Starting Catholic Parish Web App...
+
+echo [1/3] Starting PostgreSQL (Docker)...
+docker start parish-postgres >nul 2>&1
+if %errorlevel% neq 0 (
+  echo     Container not found, creating it...
+  docker run -d --name parish-postgres --restart=always -e POSTGRES_PASSWORD=parish1234 -e POSTGRES_DB=parish_db -p 127.0.0.1:5432:5432 postgres:16-alpine >nul 2>&1
+)
+echo     Waiting for PostgreSQL to be ready...
+timeout /t 5 /nobreak >nul
+echo     PostgreSQL ready.
+
+echo [2/3] Starting Backend API (port 4000)...
+start "Parish Backend" /min cmd /c "cd /d "%~dp0" && npm run dev:backend"
+
+echo [3/3] Starting Frontend (port 5173)...
+start "Parish Frontend" /min cmd /c "cd /d "%~dp0" && npm run dev:frontend"
+
+echo.
+echo Done! Opening app in browser...
+timeout /t 6 /noisy >nul
+start http://localhost:5173

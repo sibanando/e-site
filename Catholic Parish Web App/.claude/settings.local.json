@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(psql -U postgres -c \"CREATE DATABASE parish_db;\")",
+      "Bash(where psql:*)",
+      "Read(//c/Program Files/**)",
+      "Bash(docker run:*)",
+      "Bash(docker info:*)",
+      "Bash(docker exec:*)",
+      "Bash(docker ps:*)",
+      "Bash(npm install:*)",
+      "Bash(echo \"BACKEND_EXIT:$?\")",
+      "Bash(echo \"FRONTEND_EXIT:$?\")",
+      "Bash(npm run:*)",
+      "Bash(echo \"SEED_EXIT:$?\")",
+      "Bash(docker --version)",
+      "Bash(docker update:*)"
+    ]
+  }
+}
